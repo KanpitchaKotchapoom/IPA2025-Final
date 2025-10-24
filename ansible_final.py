@@ -4,7 +4,7 @@ import os
 def showrun(ip, student_id):
     # read https://www.datacamp.com/tutorial/python-subprocess to learn more about subprocess
     filename = f"show_run_{student_id}_{ip}.txt"
-    command = ['ansible-playbook', 'showrun_playbook.yml', '-i', 'hosts', '-l', ip, '-e', 'f"output_file={filename}"']
+    command = ['ansible-playbook', 'showrun_playbook.yml', '-i', 'hosts', '-l', ip, '-e', f"output_file={filename}"]
     
     if os.path.exists(filename):
         os.remove(filename)
@@ -14,7 +14,7 @@ def showrun(ip, student_id):
     print(result_output)
     print(result.stderr)
 
-    if 'ok=2' in result:
+    if 'ok=2' in result_output and 'failed=0' in result_output and 'unreachable=0' in result_output:
         return 'ok'
     else:
         return 'not okay'
