@@ -137,6 +137,11 @@ while True:
                         action_command = arg1
                         responseMessage = ansible_final.showrun(ip, MY_STUDENT_ID)
 
+                elif arg1 in ROUTER_IP and arg2 == "motd":
+                    ip = arg1
+                    action_command = "get_motd"
+                    responseMessage = netmiko_final.get_motd(ip)
+
                 elif arg1 in ROUTER_IP:
                     ip = arg1
                     action_command = arg2
@@ -168,7 +173,17 @@ while True:
 
                 else:
                     responseMessage = "Error: Invalid command format."
-            
+            elif len_parts >= 4 and parts[1] in ROUTER_IP and parts[2] == "motd":
+                ip = parts[1]
+                action_command = "set_motd"
+
+                motd_message = " ".join(parts[3:])
+
+                if ip not in ROUTER_IP:
+                    responseMessage = f"Error: Invalid IP: {ip}"
+                else:
+                    print(motd_message)
+                    responseMessage = ansible_final.set_motd(ip, motd_message)
             else:
                 responseMessage = "Error: Invalid command format. Too many arguments."
 
