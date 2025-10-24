@@ -57,3 +57,35 @@ def gigabit_status(router_ip):
     except Exception as e:
         print(f"Netmiko Error: {e}")
         return f"Error: Cannot connect to {router_ip} or run command."
+
+def get_motd(router_ip):
+    device_params = {
+        "device_type": "cisco_ios",
+        "host": router_ip,
+        "username": username,
+        "password": password,
+        # (ลบ secret ออก)
+    }
+    
+    try:
+        with ConnectHandler(**device_params) as ssh:
+            # (ลบ ssh.enable() ออก)
+            
+            result = ssh.send_command("show banner motd")
+            print(f"show banner motd result = \n{result}")
+
+            # (ลบ Error check ของ enable mode ออก)
+
+            if "% No MOTD banner is configured" in result:
+                return "Error: No MOTD Configured"
+            elif "% Invalid input" in result:
+                 # (สำคัญ) ดัก Error กรณีคำสั่งนี้ต้องใช้ Enable Mode
+                 return "Error: Command failed (Enable Mode required?)."
+            elif result:
+                return result.strip()
+            else:
+                return "Error: No MOTD Configured"
+                
+    except Exception as e:
+        print(f"Netmiko Error for get_motd {router_ip}: {e}")
+        return f"Error: Cannot connect to {router_ip} or run command."
