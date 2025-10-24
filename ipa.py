@@ -1,7 +1,7 @@
 #######################################################################################
-# Yourname:
+# Yourname: Kanpitcha Kotchapoom
 # Your student ID: 66070238
-# Your GitHub Repo: 
+# Your GitHub Repo: https://github.com/KanpitchaKotchapoom/IPA2025-Final.git
 
 #######################################################################################
 # 1. Import libraries for API requests, JSON formatting, time, os, (restconf_final or netconf_final), netmiko_final, and ansible_final.
@@ -11,6 +11,7 @@ import json
 import time
 import os
 import restconf_final
+import netconf_final
 import netmiko_final
 import ansible_final
 from requests_toolbelt.multipart.encoder import MultipartEncoder
@@ -31,6 +32,9 @@ MY_STUDENT_ID = os.environ["MY_STUDENT_ID"]
 roomIdToGetMessages = (
     os.environ["WEBEX_ROOM_ID"]
 )
+
+ROUTER_IP = ["10.0.15.61", "10.0.15.62", "10.0.15.63", "10.0.15.64", "10.0.15.65"]
+current_method = None
 
 while True:
     # always add 1 second of delay to the loop to not go over a rate limit of API calls
@@ -79,27 +83,89 @@ while True:
     if message.startswith(f"/{MY_STUDENT_ID}"):
 
         # extract the command
-        command = message.split(" ")[1]
-        print(command)
+        parts = message.split()
+        len_parts = len(parts)
+        action_command = None
+        ip = None
+        responseMessage = "Error: Unprocessed command"
+
+        part1_commands = ["create", "delete", "enable", "disable", "status"]
+        netmiko_commands = ["gigabit_status"]
+        ansible_commands = ["showrun"]
 
 # 5. Complete the logic for each command
-
-        if command == "create":
-            responseMessage = restconf_final.create(MY_STUDENT_ID)
-        elif command == "delete":
-            responseMessage = restconf_final.delete(MY_STUDENT_ID)
-        elif command == "enable":
-            responseMessage = restconf_final.enable(MY_STUDENT_ID)
-        elif command == "disable":
-            responseMessage = restconf_final.disable(MY_STUDENT_ID)
-        elif command == "status":
-            responseMessage = restconf_final.status(MY_STUDENT_ID)
-        elif command == "gigabit_status":
-            responseMessage = netmiko_final.gigabit_status()
-        elif command == "showrun":
-            responseMessage = ansible_final.showrun()
+        if len_parts < 2:
+            responseMessage = "Error: No command provided."
         else:
-            responseMessage = "Error: No command or unknown command"
+            arg1 = parts[1]
+
+            if len_parts == 2:
+                if arg1 == "restconf":
+                    current_method = "restconf"
+                    responseMessage = "Ok: Restconf"
+                elif arg1 == "netconf":
+                    current_method = "netconf"
+                    responseMessage = "Ok: Netconf"
+
+                elif arg1 in part1_commands:
+                    if current_method is None:
+                        responseMessage = "Error: No method specified"
+                    else:
+                        responseMessage = "Error: No IP specified"
+
+                elif arg1 in ROUTER_IP:
+                    responseMessage = "Error: No command found."
+
+                else:
+                    responseMessage = f"Error: Unknown command or invalid format: {arg1}"
+            elif len_parts == 3:
+                arg2 = parts[2]
+
+                if arg1 in netmiko_commands:
+                    ip = arg2
+                    if ip not in ROUTER_IP:
+                        responseMessage = f"Error: Invalid IP: {ip}"
+                    else:
+                        action_command = arg1
+                        responseMessage = netmiko_final.gigabit_status(ip)
+                
+                elif arg1 in ansible_commands:
+                    ip = arg2
+                    if ip not in ROUTER_IP:
+                        responseMessage = f"Error: Invalid IP: {ip}"
+                    else:
+                        action_command = arg1
+                        responseMessage = ansible_final.showrun(ip, MY_STUDENT_ID)
+
+                elif arg1 in ROUTER_IP:
+                    ip = arg1
+                    action_command = arg2
+
+                    if action_command not in part1_commands:
+                        responseMessage = f"Error: Unknown command: {action_command}"
+                    
+                    elif current_method is None:
+                        responseMessage = "Error: No method specified"
+
+                    elif current_method == "restconf":
+                        if action_command == "create": responseMessage = restconf_final.create(MY_STUDENT_ID, ip)
+                        elif action_command == "delete": responseMessage = restconf_final.delete(MY_STUDENT_ID, ip)
+                        elif action_command == "enable": responseMessage = restconf_final.enable(MY_STUDENT_ID, ip)
+                        elif action_command == "disable": responseMessage = restconf_final.disable(MY_STUDENT_ID, ip)
+                        elif action_command == "status": responseMessage = restconf_final.status(MY_STUDENT_ID, ip)
+                    
+                    elif current_method == "netconf":
+                        if action_command == "create": responseMessage = netconf_final.create(MY_STUDENT_ID, ip)
+                        elif action_command == "delete": responseMessage = netconf_final.delete(MY_STUDENT_ID, ip)
+                        elif action_command == "enable": responseMessage = netconf_final.enable(MY_STUDENT_ID, ip)
+                        elif action_command == "disable": responseMessage = netconf_final.disable(MY_STUDENT_ID, ip)
+                        elif action_command == "status": responseMessage = netconf_final.status(MY_STUDENT_ID, ip)
+
+                else:
+                    responseMessage = "Error: Invalid command format."
+            
+            else:
+                responseMessage = "Error: Invalid command format. Too many arguments."
 
 # 6. Complete the code to post the message to the Webex Teams room.
 
@@ -115,8 +181,8 @@ while True:
         # Read Send a Message with Attachments Local File Attachments
         # https://developer.webex.com/docs/basics for more detail
 
-        if command == "showrun" and responseMessage != "not okay":
-            filename = 'show_run_66070238_CSR1kv.txt'
+        if action_command == "showrun" and responseMessage == "ok":
+            filename = f'show_run_{MY_STUDENT_ID}_{ip}.txt'
             fileobject = open(filename, "rb")
             filetype = "text/plain"
             postData = {
@@ -144,7 +210,7 @@ while True:
             headers=HTTPHeaders,
         )
 
-        if command == "showrun" and responseMessage != "Error: Ansible":
+        if action_command == "showrun" and responseMessage == "ok":
             fileobject.close()
 
         if not r.status_code == 200:
