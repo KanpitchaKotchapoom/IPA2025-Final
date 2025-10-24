@@ -18,3 +18,22 @@ def showrun(ip, student_id):
         return 'ok'
     else:
         return 'not okay'
+
+def set_motd(ip, message):
+    command = [
+        'ansible-playbook',
+        'motd_playbook.yml',
+        '-i', 'hosts',
+        '-l', ip,
+        '-e', f"motd_message={message}"
+    ]
+    
+    result = subprocess.run(command, capture_output=True, text=True)
+    result_output = result.stdout
+    print(result_output)
+    print(result.stderr)
+
+    if 'ok=1' in result_output and 'failed=0' in result_output and 'unreachable=0' in result_output:
+        return "Ok: success"
+    else:
+        return f"Error: Failed to set MOTD on {ip}."

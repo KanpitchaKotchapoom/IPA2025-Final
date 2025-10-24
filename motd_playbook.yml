@@ -1,0 +1,12 @@
+---
+- name: CONFIGURE MOTD BANNER
+  hosts: CSR1kv
+  gather_facts: false
+  connection: network_cli
+
+  tasks:
+    - name: SET MOTD BANNER
+      cisco.ios.ios_banner:
+        banner: motd
+        text: "{{ motd_message }}" # รับค่าตัวแปรจาก command line
+        state: present
