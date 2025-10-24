@@ -2,7 +2,7 @@
 - name: AUTOMATIC BACKUP OF RUNNING-CONFIG
   hosts: CSR1kv
   gather_facts: false
-  connection: local
+  connection: network_cli
  
   tasks:
    - name: DISPLAYING THE RUNNING-CONFIG
@@ -14,4 +14,4 @@
    - name: SAVE OUTPUT TO ./backups/
      copy:
        content: "{{ config.stdout[0] }}"
-       dest: "show_run_66070238_{{ inventory_hostname }}.txt"
+       dest: "{{ output_file }}"

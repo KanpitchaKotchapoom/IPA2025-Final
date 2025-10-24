@@ -1,1 +1,6 @@
-CSR1kv ansible_user=admin ansible_password=cisco ansible_host=10.0.15.61 ansible_network_os=ios ansible_connection=network_cli
+[CSR1kv]
+10.0.15.61 ansible_user=admin ansible_password=cisco ansible_network_os=ios ansible_connection=network_cli
+10.0.15.62 ansible_user=admin ansible_password=cisco ansible_network_os=ios ansible_connection=network_cli
+10.0.15.63 ansible_user=admin ansible_password=cisco ansible_network_os=ios ansible_connection=network_cli
+10.0.15.64 ansible_user=admin ansible_password=cisco ansible_network_os=ios ansible_connection=network_cli
+10.0.15.65 ansible_user=admin ansible_password=cisco ansible_network_os=ios ansible_connection=network_cli
