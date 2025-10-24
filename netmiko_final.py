@@ -5,19 +5,17 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-device_ip = os.environ["ROUTER_IP"]
 username = os.environ["ROUTER_USER"]
 password = os.environ["ROUTER_PASS"]
 
-device_params = {
-    "device_type": "cisco_ios",
-    "host": device_ip,
-    "username": username,
-    "password": password,
-}
+def gigabit_status(router_ip):
+    device_params = {
+        "device_type": "cisco_ios",
+        "host": router_ip,
+        "username": username,
+        "password": password,
+    }
 
-
-def gigabit_status():
     try:
         with ConnectHandler(**device_params) as ssh:
             up = 0
@@ -52,10 +50,10 @@ def gigabit_status():
 
             detail_part = ", ".join(detail_strings)
             summary_part = f"-> {up} up, {down} down, {admin_down} administratively down"
-            ans = f"{detail_part} {summary_part}"
+            ans = f"Status for {router_ip}: {detail_part} {summary_part}"
             
             return ans
             
     except Exception as e:
         print(f"Netmiko Error: {e}")
-        return f"Error: Cannot connect to router or run command."
+        return f"Error: Cannot connect to {router_ip} or run command."
