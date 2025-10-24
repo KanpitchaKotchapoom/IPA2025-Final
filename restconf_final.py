@@ -8,13 +8,8 @@ load_dotenv()
 requests.packages.urllib3.disable_warnings()
 
 # Router IP Address is 10.0.15.181-184
-ROUTER_IP = os.environ["ROUTER_IP"]
 ROUTER_USER = os.environ["ROUTER_USER"]
 ROUTER_PASS = os.environ["ROUTER_PASS"]
-
-NATIVE_URL = f"https://{ROUTER_IP}/restconf/data/Cisco-IOS-XE-native:native"
-OPER_URL = f"https://{ROUTER_IP}/restconf/data/ietf-interfaces:interfaces-state"
-IETF_URL = f"https://{ROUTER_IP}/restconf/data/ietf-interfaces:interfaces"
 
 # the RESTCONF HTTP headers, including the Accept and Content-Type
 # Two YANG data formats (JSON and XML) work with RESTCONF 
@@ -25,14 +20,15 @@ headers = {
 basicauth = (ROUTER_USER, ROUTER_PASS)
 
 
-def create(student_id):
+def create(student_id, router_ip):
+    IETF_URL = f"https://{router_ip}/restconf/data/ietf-interfaces:interfaces"
     name = f"Loopback{student_id}"
     # --- ใช้ IETF_URL ---
     url = f"{IETF_URL}/interface={name}"
 
     check_resp = requests.get(url, auth=basicauth, headers=headers, verify=False)
     if check_resp.status_code == 200:
-        print(f"Interface {name} already exists.")
+        print(f"Interface {name} on {router_ip} already exists.")
         return f"Cannot create: Interface {name}"
 
     x = student_id[-3]
@@ -66,14 +62,14 @@ def create(student_id):
 
     if(resp.status_code >= 200 and resp.status_code <= 299):
         print("STATUS OK: {}".format(resp.status_code))
-        return f"Interface {name} is created successfully"
+        return f"Interface {name} is created successfully using Restconf"
     else:
         print('Error. Status Code: {}'.format(resp.status_code))
-        return f"Error creating interface: {resp.text}"
+        return f"Cannot create: Interface {name}"
 
-def delete(student_id):
+def delete(student_id, router_ip):
+    IETF_URL = f"https://{router_ip}/restconf/data/ietf-interfaces:interfaces"
     name = f"Loopback{student_id}"
-    # --- เปลี่ยน URL ---
     url = f"{IETF_URL}/interface={name}"
 
     resp = requests.delete(
@@ -85,19 +81,15 @@ def delete(student_id):
 
     if(resp.status_code >= 200 and resp.status_code <= 299):
         print("STATUS OK: {}".format(resp.status_code))
-        return f"Interface {name} is deleted successfully"
+        return f"Interface {name} is deleted successfully using Restconf"
     else:
         print('Error. Status Code: {}'.format(resp.status_code))
         return f"Cannot delete: Interface {name}"
 
-def enable(student_id):
+def enable(student_id, router_ip):
+    IETF_URL = f"https://{router_ip}/restconf/data/ietf-interfaces:interfaces"
     name = f"Loopback{student_id}"
-    # --- เปลี่ยน URL ให้ชี้ไปที่ leaf 'enabled' ของ IETF ---
     url = f"{IETF_URL}/interface={name}/enabled"
-
-    # --- เปลี่ยน Payload ให้ตรงกับโมเดล IETF ---
-    # โมเดล Cisco-IOS-XE-native ใช้ "Cisco-IOS-XE-native:enabled"
-    # โมเดล ietf-interfaces ใช้ "ietf-interfaces:enabled"
     yangConfig = {"ietf-interfaces:enabled": True}
 
     resp = requests.put(
@@ -110,17 +102,15 @@ def enable(student_id):
 
     if(resp.status_code >= 200 and resp.status_code <= 299):
         print("STATUS OK: {}".format(resp.status_code))
-        return f"Interface {name} is enabled successfully"
+        return f"Interface {name} is enabled successfully using Restconf"
     else:
         print('Error. Status Code: {}'.format(resp.status_code))
         return f"Cannot enable: Interface {name}"
 
-def disable(student_id):
+def disable(student_id, router_ip):
+    IETF_URL = f"https://{router_ip}/restconf/data/ietf-interfaces:interfaces"
     name = f"Loopback{student_id}"
-    # --- เปลี่ยน URL ให้ชี้ไปที่ leaf 'enabled' ของ IETF ---
     url = f"{IETF_URL}/interface={name}/enabled"
-
-    # --- เปลี่ยน Payload ให้ตรงกับโมเดล IETF ---
     yangConfig = {
         "ietf-interfaces:enabled": False
     }
@@ -135,12 +125,13 @@ def disable(student_id):
 
     if(resp.status_code >= 200 and resp.status_code <= 299):
         print("STATUS OK: {}".format(resp.status_code))
-        return f"Interface {name} is shutdowned successfully"
+        return f"Interface {name} is shutdowned successfully using Restconf"
     else:
         print('Error. Status Code: {}'.format(resp.status_code))
-        return f"Cannot shutdown: Interface {name}"
+        return f"Cannot shutdown: Interface {name} (checked by Restconf)"
 
-def status(student_id):
+def status(student_id, router_ip):
+    OPER_URL = f"https://{router_ip}/restconf/data/ietf-interfaces:interfaces-state"
     name = f"Loopback{student_id}"
     api_url_status = f"{OPER_URL}/interface={name}"
 
@@ -158,15 +149,15 @@ def status(student_id):
         oper_status = response_json["ietf-interfaces:interface"]["oper-status"]
 
         if admin_status == 'up' and oper_status == 'up':
-            return f"Interface {name} is enabled"
+            return f"Interface {name} is enabled (checked by Restconf)"
         elif admin_status == 'down' and oper_status == 'down':
-            return f"Interface {name} is disabled"
+            return f"Interface {name} is disabled (checked by Restconf)"
         else:
             return f"Interface {name} state is inconsistent (Admin: {admin_status}, Oper: {oper_status})"
 
     elif(resp.status_code == 404):
         print("STATUS NOT FOUND: {}".format(resp.status_code))
-        return f"No Interface {name}"
+        return f"No Interface {name} (checked by Restconf)"
     else:
         print('Error. Status Code: {}'.format(resp.status_code))
-        return f"Error checking status: {resp.text}"
+        return f"Error checking status on {router_ip}: {resp.text}"
