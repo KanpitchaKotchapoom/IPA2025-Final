@@ -142,7 +142,12 @@ while True:
                     action_command = arg2
 
                     if action_command not in part1_commands:
-                        responseMessage = f"Error: Unknown command: {action_command}"
+                        if action_command in netmiko_commands:
+                            responseMessage = netmiko_final.gigabit_status(ip)
+                        elif action_command in ansible_commands:
+                            responseMessage = ansible_final.showrun(ip, MY_STUDENT_ID)
+                        else:
+                            responseMessage = f"Error: Unknown command: {action_command}"
                     
                     elif current_method is None:
                         responseMessage = "Error: No method specified"
