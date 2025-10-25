@@ -6,7 +6,7 @@ IPA2025 Final Lab Exam - 66070238
     Student_ID = 66070238
     
     Github Repo = https://github.com/KanpitchaKotchapoom/IPA2025-Final.git
-    Docs = https://kmitlthailand-my.sharepoint.com/:w:/g/personal/66070238_kmitl_ac_th/ETUurAgSx3hIoQJf21dYCTwBF2xXK59Vd3EpZivI0iLTmw?e=e3U9Va
+    Docs = https://docs.google.com/document/d/1v1AIQ_RiDacJKYk7ZBxb_G0oZi5DZHOvNet-CH6prR4/edit?usp=sharing
 
 =================================
 
@@ -25,65 +25,65 @@ IPA2025 Final Lab Exam - 66070238
     # ตัวอย่าง
 
 /66070123 create
-# Error: No method specified
+// Error: No method specified
 
 /66070123 restconf
-# Ok: Restconf 
+// Ok: Restconf 
 
 /66070123 create
-# Error: No IP specified
+// Error: No IP specified
 
 /66070123 10.0.15.61
-# Error: No command found.
+// Error: No command found.
 
 /66070123 10.0.15.61 create
-# Interface loopback 66070123 is created successfully using Restconf
+// Interface loopback 66070123 is created successfully using Restconf
 
 /66070123 10.0.15.61 create
-# Cannot create: Interface loopback 66070123
+// Cannot create: Interface loopback 66070123
 
 /66070123 delete
-# Error: No IP specified
+// Error: No IP specified
 
 /66070123 netconf
-# Ok: Netconf 
+// Ok: Netconf 
 
 
 /66070123 10.0.15.61 delete
-# Interface loopback 66070123 is deleted successfully using Netconf
+// Interface loopback 66070123 is deleted successfully using Netconf
 
 /66070123 10.0.15.61 delete
-# Cannot delete: Interface loopback 66070123
+// Cannot delete: Interface loopback 66070123
 
 /66070123 10.0.15.61 create
-# Interface loopback 66070123 is created successfully using Netconf
+// Interface loopback 66070123 is created successfully using Netconf
 
 /66070123 10.0.15.61 enable
-# Cannot enable: Interface loopback 66070123
+// Cannot enable: Interface loopback 66070123
 
 /66070123 10.0.15.61 enable
-# Interface loopback 66070123 is enabled successfully using Netconf
+// Interface loopback 66070123 is enabled successfully using Netconf
 
 /66070123 10.0.15.61 disable
-# Interface loopback 66070123 is shutdowned successfully using Netconf
+// Interface loopback 66070123 is shutdowned successfully using Netconf
 
 /66070123 10.0.15.61 disable
-# Cannot shutdown: Interface loopback 66070123 (checked by Netconf)
+// Cannot shutdown: Interface loopback 66070123 (checked by Netconf)
 
 /66070123 10.0.15.61 status
-# Interface loopback 66070123 is disabled (checked by Netconf)
+// Interface loopback 66070123 is disabled (checked by Netconf)
 
 /66070123 10.0.15.61 enable
-# Interface loopback 66070123 is enabled successfully using Netconf
+// Interface loopback 66070123 is enabled successfully using Netconf
 
 /66070123 restconf
-# Ok: Restconf
+// Ok: Restconf
 
 /66070123 10.0.15.61 status
-# Interface loopback 66070123 is enabled (checked by Restconf)
+// Interface loopback 66070123 is enabled (checked by Restconf)
 
 /66070123 10.0.15.61 status
-# No Interface loopback 66070123 (checked by Restconf)
+// No Interface loopback 66070123 (checked by Restconf)
 
 =================================
 
@@ -95,12 +95,12 @@ IPA2025 Final Lab Exam - 66070238
 
 	# ตัวอย่าง
 /66070123 10.0.15.61 motd Authorized users only! Managed by 66070123
-# Ok: success
+// Ok: success
 	
 /66070123 10.0.15.61 motd
-# Authorized users only! Managed by 66070123
+// Authorized users only! Managed by 66070123
 
 /66070123 10.0.15.45 motd
-# Error: No MOTD Configured
+// Error: No MOTD Configured
 
 =================================
